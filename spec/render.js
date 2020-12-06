@@ -1,0 +1,34 @@
+const ReactDOM = require('react-dom');
+const {act} = require('react-dom/test-utils');
+
+let root = null;
+
+beforeEach(() => {
+  root = document.createElement('div');
+  document.body.appendChild(root);
+});
+
+afterEach(() => {
+  ReactDOM.unmountComponentAtNode(root);
+  document.body.removeChild(root);
+});
+
+function render(component) {
+  act(() => {
+    ReactDOM.render(component, root);
+  });
+}
+
+function unmount() {
+  ReactDOM.unmountComponentAtNode(root);
+}
+
+function querySelector(selector) {
+  return root.querySelector(selector);
+}
+
+Object.assign(exports, {
+  render,
+  unmount,
+  querySelector,
+});
