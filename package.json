@@ -1,6 +1,6 @@
 {
   "name": "react-hook-awaited",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "wrapper hook for awaiting promises",
   "files": [
     "index.js",
