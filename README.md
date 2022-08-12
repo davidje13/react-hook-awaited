@@ -17,7 +17,7 @@ const useAwaited = require('react-hook-awaited');
 
 const MyComponent = () => {
   const apiUrl = 'https://xkcd.com/info.0.json';
-  const apiResponse = useAwaited(() => fetch(apiUrl).then((r) => r.json()), [apiUrl]);
+  const apiResponse = useAwaited((signal) => fetch(apiUrl, { signal }).then((r) => r.json()), [apiUrl]);
 
   switch (apiResponse.state) {
     case 'pending':
@@ -57,13 +57,24 @@ Invokes the `generatorFunction` and returns the state of the returned
 promise.
 
 - `generatorFunction`: a function which returns a promise which is
-  to be awaited.
+  to be awaited. It is passed a single argument: an
+  [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)
+  which will be marked as aborted if a change means that the current
+  request is no-longer required.
 - `deps`: a list of dependencies for the `generatorFunction`, matching
   the same API as
-  [`React.useCallback`](https://reactjs.org/docs/hooks-reference.html#usecallback)
+  [`React.useCallback`](https://reactjs.org/docs/hooks-reference.html#usecallback).
+
+The `AbortSignal` can be passed directly to `fetch` calls to avoid
+leaving requests running which are no-longer required:
+
+```js
+useAwaited((abortSignal) => fetch('https://example.com', { signal: abortSignal }), []);
+```
 
 **note:** If the `deps` change, the current promise will be discarded,
-`generatorFunction` will be called, and a new promise will be awaited.
+the `AbortSignal` will be triggered, `generatorFunction` will be called
+again, and the newly returned promise will be awaited.
 
 #### Return value
 
@@ -108,7 +119,7 @@ const useAwaited = require('react-hook-awaited');
 const ComicViewer = () => {
   const [num, setNum] = useState(1);
   const apiUrl = `https://xkcd.com/${num}/info.0.json`;
-  const apiResponse = useAwaited(() => fetch(apiUrl).then((r) => r.json()), [apiUrl]);
+  const apiResponse = useAwaited((signal) => fetch(apiUrl, { signal }).then((r) => r.json()), [apiUrl]);
 
   let content;
   if (apiResponse.state === 'pending') {
@@ -145,7 +156,7 @@ const useAwaited = require('react-hook-awaited');
 
 const DataFetcher = () => {
   const apiUrl = 'https://xkcd.com/info.0.json';
-  const apiResponse = useAwaited(() => fetch(apiUrl).then((r) => r.json()), [apiUrl]);
+  const apiResponse = useAwaited((signal) => fetch(apiUrl, { signal }).then((r) => r.json()), [apiUrl]);
 
   let content = null;
   if (apiResponse.latestData) {
@@ -183,7 +194,7 @@ const {useTimeInterval} = require('react-hook-final-countdown');
 const DataFetcher = () => {
   const apiUrl = 'https://xkcd.com/info.0.json';
   const time = useTimeInterval(1000 * 60 * 60); // update every hour
-  const apiResponse = useAwaited(() => fetch(apiUrl).then((r) => r.json()), [apiUrl, time]);
+  const apiResponse = useAwaited((signal) => fetch(apiUrl, { signal }).then((r) => r.json()), [apiUrl, time]);
 
   return (
     <section>

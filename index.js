@@ -50,21 +50,21 @@ function useAwaitedWithDefault(def, promiseGenerator, deps) {
   }));
 
   useEffect(() => {
-    let live = true;
+    const ac = new AbortController();
     setState(applyLoadState);
-    Promise.resolve()
+    Promise.resolve(ac.signal)
       .then(memoPromiseGenerator)
       .then((data) => {
-        if (live) {
+        if (!ac.signal.aborted) {
           setState(applyFinState(RESOLVED, data, undefined));
         }
       })
       .catch((error) => {
-        if (live) {
+        if (!ac.signal.aborted) {
           setState(applyFinState(REJECTED, undefined, error));
         }
       });
-    return () => (live = false);
+    return () => ac.abort();
   }, [memoPromiseGenerator, forceUpdate]);
 
   return state;

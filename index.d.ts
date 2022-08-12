@@ -18,12 +18,12 @@ export type AwaitedState<T, ErrorT = unknown, InitialT = undefined> = (
 };
 
 export default function useAwaited<T>(
-  promiseGenerator: () => (Promise<T> | T),
+  promiseGenerator: (abortSignal: AbortSignal) => (Promise<T> | T),
   deps: React.DependencyList,
 ): AwaitedState<T>;
 
 export function useAwaitedWithDefault<T>(
   initial: (() => T) | T,
-  promiseGenerator: () => (Promise<T> | T),
+  promiseGenerator: (abortSignal: AbortSignal) => (Promise<T> | T),
   deps: React.DependencyList,
 ): AwaitedState<T, unknown, T>;

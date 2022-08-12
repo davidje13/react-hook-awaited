@@ -6,7 +6,7 @@ beforeEach(() => {
 
 module.exports = {
   runPending() {
-    return act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    return act(() => new Promise(process.nextTick));
   },
 
   delayedPromise() {

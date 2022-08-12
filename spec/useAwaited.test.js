@@ -1,5 +1,5 @@
 const React = require('react');
-const {Simulate} = require('react-dom/test-utils');
+const {Simulate, act} = require('react-dom/test-utils');
 const {render, unmount, querySelector} = require('./render');
 const {runPending, delayedPromise} = require('./helpers');
 const useAwaited = require('../index');
@@ -26,7 +26,7 @@ function getOutput() {
 }
 
 function clickRefresh() {
-  Simulate.click(querySelector('div'));
+  act(() => Simulate.click(querySelector('div')));
 }
 
 describe('useAwaited', () => {
@@ -210,6 +210,29 @@ describe('useAwaited', () => {
       await runPending();
 
       expect(console.error).not.toHaveBeenCalled();
+    });
+
+    it('triggers the AbortSignal when a new request appears', async () => {
+      let capturedSignal1 = null;
+      const promise1 = delayedPromise();
+      renderHook((signal) => {
+        capturedSignal1 = signal;
+        return promise1;
+      }, [1]);
+      await runPending();
+
+      expect(capturedSignal1.aborted).toBeFalsy();
+
+      let capturedSignal2 = null;
+      const promise2 = delayedPromise();
+      renderHook((signal) => {
+        capturedSignal2 = signal;
+        return promise2;
+      }, [2]);
+      await runPending();
+
+      expect(capturedSignal1.aborted).toBeTruthy();
+      expect(capturedSignal2.aborted).toBeFalsy();
     });
   });
 
