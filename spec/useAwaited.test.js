@@ -102,11 +102,35 @@ describe('useAwaited', () => {
       expect(getOutput().result.data).toEqual('bye');
     });
 
+    it('re-runs if the function changes and there are no deps', async () => {
+      renderHook(() => Promise.resolve('hello'));
+      await runPending();
+
+      renderHook(() => Promise.resolve('bye'));
+      await runPending();
+
+      expect(getOutput().result.data).toEqual('bye');
+    });
+
     it('does not re-run if the deps remain constant', async () => {
       renderHook(() => Promise.resolve('hello'), [1]);
       await runPending();
 
       renderHook(() => Promise.resolve('bye'), [1]);
+      await runPending();
+
+      expect(getOutput().result.data).toEqual('hello');
+    });
+
+    it('does not re-run if the function remains constant and there are no deps', async () => {
+      let res = 'hello';
+      const fn = () => Promise.resolve(res);
+      renderHook(fn);
+      await runPending();
+
+      res = 'bye';
+
+      renderHook(fn);
       await runPending();
 
       expect(getOutput().result.data).toEqual('hello');

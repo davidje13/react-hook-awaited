@@ -42,7 +42,7 @@ const inc = (v) => (v + 1);
 
 function useAwaitedWithDefault(def, promiseGenerator, deps) {
   const [forceUpdate, setForceUpdate] = useState(0);
-  const memoPromiseGenerator = useCallback(promiseGenerator, deps);
+  const memoPromiseGenerator = useCallback(promiseGenerator, deps || [promiseGenerator]);
   const [state, setState] = useState(() => applyLoadState({
     latestData: def,
     latestStats: undefined,

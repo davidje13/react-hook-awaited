@@ -40,9 +40,21 @@ you should configure it to check dependencies for `useAwaited` and
 `useAwaitedWithDefault`:
 
 ```json
-    "react-hooks/exhaustive-deps": ["warn", {
-      "additionalHooks": "(useAwaited|useAwaitedWithDefault)"
-    }]
+"react-hooks/exhaustive-deps": ["warn", {
+  "additionalHooks": "(useAwaited|useAwaitedWithDefault)"
+}]
+```
+
+Alternatively, you can provide functions using `useCallback` yourself
+(this requires more syntax but avoids the need to reconfigure the linter):
+
+```js
+const apiResponse = useAwaited(
+  useCallback(
+    (signal) => fetch(apiUrl, { signal }).then((r) => r.json()),
+    [apiUrl]
+  )
+);
 ```
 
 ## API
@@ -75,6 +87,10 @@ useAwaited((abortSignal) => fetch('https://example.com', { signal: abortSignal }
 **note:** If the `deps` change, the current promise will be discarded,
 the `AbortSignal` will be triggered, `generatorFunction` will be called
 again, and the newly returned promise will be awaited.
+
+If you do not provide `deps`, the default is to re-invoke the generator
+whenever the generator function changes. This means you can pass a
+`useCallback`-wrapped function _instead of_ providing `deps`.
 
 #### Return value
 
